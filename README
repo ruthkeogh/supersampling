@@ -1,0 +1,63 @@
+#######################################
+#######################################
+This project contains R code for implementation of the simulation study described in the paper: 
+
+Ørnulf Borgan, Ruth Keogh, Aleksander Njøs. Use of multiple imputation in supersampled nested case-control and case-cohort studies. Scandinavian Journal of Statistics 2023; 50 (1): 13-37. https://doi.org/10.1111/sjos.12624
+
+All three authors contributed to the development of the code. 
+Please address questions, comments, and reporting of bugs, to Ruth Keogh: ruth.keogh@lshtm.ac.uk
+#######################################
+#######################################
+
+#######################################
+#Functions for implementing the MI-SMC approach
+#######################################
+
+smcfcs_reduced.R
+  - Contains the following functions, which are used in the analysis files to perform the MI-SMC analyses: smcfcs.red, smcfcs.casecohort.red.Prentice, smcfcs.casecohort.red.LinYing, smcfcs.nestedcc.red
+  - These are simplified versions of the smcfcs functions in the smcfcs package, which provides methods for imputing missing values of covariates using the Substantive Model Compatible Fully Conditional                Specification multiple imputation approach proposed by Bartlett et al 2015 (Bartlett, J. W., Seaman, S. R., White, I. R., & Carpenter, J. R. (2015). Multiple imputation of covariates by fully
+    conditional specification: Accommodating the substantive model. Statistical Methods in Medical Research, 24, 462–487.).
+  - See https://cran.r-project.org/web/packages/smcfcs/index.html for the smcfcs package. 
+  - In this reduced version of the smcfcs function, we reduce it to the elements required for Cox regression, case-cohort studies and nested case-control studies. 
+  - There are some modifications to the implementations of smcfcs for case-cohort and nested case-control studies compared to the methods in the smcfcs package. 
+
+#######################################
+#Files relating to nested case-control studies: data generation and analysis
+#######################################
+
+1. generate_data_ncc
+  - Simulates data for a full cohort, and creates a standard nested case-control (NCC) sample and two NCC superset samples (small - super1, large - super2).
+  - The simulation icnludes options for the full cohort sample size (n=5000 or 25000), whether there is an interaction between X and Z1 in the hazard model (interaction=T or F) and whether the distribution of X|Z1     ,Z2 is normal (misspec=F) or non-normal (misspec=T).
+
+2. analysis_ncc_interactionF
+  - Performs analyses for the scenario in which there is no interaction between X and Z1 in the hazard model (interaction=F) - see section 5.1.4 for summary of methods.
+  - Results from implementing these methods are reported in Table 1 (for n=25000, interaction=F, misspec=F), Table 3 (for n=25000, interaction=F, misspec=T), Table S5 (for n=5000, interaction=F, misspec=F), Table      S7 (for n=5000, interaction=F, misspec=T).
+  
+3. analysis_ncc_interactionT
+  - Performs analyses for the scenario in which there is an interaction between X and Z1 in the hazard model (interaction=T) - see section 5.1.4 for summary of methods.
+  - Results from implementing these methods are reported in Table 2 (for n=25000, interaction=T, misspec=F), Table S6 (for n=5000, interaction=T, misspec=F).
+
+4. analysis_ncc_interactionF_MisspecAlternative
+  - This file differs from analysis_ncc_interactionF.R only in that the MI-SMC analyses assume that log(X) is conditionally normally distributed instead of X being conditionally normally distributed.
+  - This alternative MI-SMC analysis was considered when data are generated using misspec=T. See the discussion section of the paper (Section 6) and Table S12. 
+
+#######################################
+#Files relating to case-cohort studies: data generation and analysis
+#######################################
+
+1. generate_data_casecohort
+  - Simulates data for a full cohort, and creates a case-cohort sample and two case-cohort superset samples (small - super1, large - super2).
+  - The simulation icnludes options for the full cohort sample size (n=5000 or 25000), whether there is an interaction between X and Z1 in the hazard model (interaction=T or F) and whether the distribution of X|Z1     ,Z2 is normal (misspec=F) or non-normal (misspec=T).
+
+2. analysis_casecohort_interactionF
+  - Performs analyses for the scenario in which there is no interaction between X and Z1 in the hazard model (interaction=F) - see section 5.1.4 for summary of methods.
+  - Results from implementing these methods are reported in Table 4 (for n=25000, interaction=F, misspec=F, method="LinYing"), Table 6 (for n=25000, interaction=F, misspec=T, method="LinYing"), Table S2 (for n         =25000, interaction=F, misspec=F, method="Prentice" and method="LinYing"), Table S4 (for n=25000, interaction=F, misspec=T, method="Prentice" and method="LinYing"), Table S8 (for n=5000, interaction=F, misspec     =F, method="Prentice" and method="LinYing"), Table S10 (for n=5000, interaction=F, misspec=T, method="Prentice" and method="LinYing").
+  - Note that method="LinYing" (in the cch command) refers to the IPW analysis for case-cohort data.
+
+3. analysis_casecohort_interactionT
+  - Performs analyses for the scenario in which there is an interaction between X and Z1 in the hazard model (interaction=T) - see section 5.1.4 for summary of methods.
+  - Results from implementing these methods are reported in Table 5 (for n=25000, interaction=T, misspec=F, method="LinYing"), Table S3 (for n=25000, interaction=T, misspec=F, method="Prentice" and method="LinYing"     ), Table S9 (for n=5000, interaction=T, misspec=F, method="Prentice" and method="LinYing").
+
+4. analysis_casecohort_interactionF_MisspecAlternative
+  - This file differs from analysis_casecohort_interactionF.R only in that the MI-SMC analyses assume that log(X) is conditionally normally distributed instead of X being conditionally normally distributed.
+  - This alternative MI-SMC analysis was considered when data are generated using misspec=T. See the discussion section of the paper (Section 6) and Table S11. 
